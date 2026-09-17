@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LoginForm } from "@/components/settings/login-form";
 import { GoogleButton } from "@/components/settings/google-button";
@@ -20,7 +21,9 @@ export default function LoginPage() {
             <span className="bg-card px-2 text-muted-foreground">atau dengan email</span>
           </div>
         </div>
-        <LoginForm />
+        <Suspense fallback={<div className="h-[168px]" />}>
+          <LoginForm />
+        </Suspense>
         <p className="text-center text-sm text-muted-foreground">
           Belum punya akun?{" "}
           <Link href="/register" className="text-primary font-medium hover:underline">
