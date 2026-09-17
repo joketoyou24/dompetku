@@ -1,0 +1,145 @@
+// Schema Prisma - DompetKu
+// CATATAN PENTING soal provider database:
+// SQLite (dev) TIDAK mendukung tipe `enum` dan `Decimal`, sehingga field
+// `type` (Income/Expense) dan `paymentMethod` disimpan sebagai String dan
+// divalidasi lewat Zod (lihat src/lib/validations.ts) serta union type
+// TypeScript (lihat src/types/index.ts). Pendekatan ini membuat schema yang
+// SAMA bisa dipakai untuk SQLite (dev) maupun PostgreSQL (production) —
+// saat deploy ke Vercel, cukup ganti `provider = "sqlite"` menjadi
+// `provider = "postgresql"` di bawah ini (lihat README bagian Deployment).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // ganti ke "postgresql" untuk production di Vercel
+  url      = env("DATABASE_URL")
+}
+
+// ================= AUTH (Auth.js) =================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String? // hash bcrypt, dipakai untuk login Email/Password
+  currency      String    @default("IDR")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  transactions Transaction[]
+  categories   Category[]
+  budgets      Budget[]
+  savingGoals  SavingGoal[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ================= DOMAIN =================
+
+// type: "INCOME" | "EXPENSE"
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  icon      String?
+  color     String?
+  isDefault Boolean  @default(false)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@index([userId])
+}
+
+// type: "INCOME" | "EXPENSE"
+// paymentMethod: "CASH" | "BANK" | "EWALLET"
+model Transaction {
+  id            String   @id @default(cuid())
+  date          DateTime
+  type          String
+  amount        Float
+  description   String?
+  paymentMethod String
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([userId, date])
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  amount     Float
+  month      Int // 1-12
+  year       Int
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, month, year])
+}
+
+model SavingGoal {
+  id            String    @id @default(cuid())
+  name          String
+  targetAmount  Float
+  currentAmount Float     @default(0)
+  deadline      DateTime?
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+}
