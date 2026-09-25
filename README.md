@@ -27,13 +27,9 @@
 
 ## 📸 Preview
 
-> *(Tambahkan screenshot/GIF dashboard, transaksi, dan mode gelap di sini — simpan di `public/screenshots/` lalu referensikan seperti di bawah)*
-
-```md
 ![Dashboard](public/screenshots/dashboard.png)
-![Transactions](public/screenshots/transactions.png)
-![Dark Mode](public/screenshots/dark-mode.png)
-```
+![Transactions](public/screenshots/transaksi.png)
+![Dark Mode](public/screenshots/dashboard_dark_mode.png)
 
 ---
 
