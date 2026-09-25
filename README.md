@@ -1,175 +1,178 @@
-# DompetKu 💚
+# 💚 DompetKu — Personal Finance Web App
 
-Aplikasi web modern untuk mengatur keuangan pribadi — catat transaksi, atur anggaran bulanan, buat target tabungan, dan pantau semuanya lewat dashboard yang bersih ala Apple Finance + Notion.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?logo=next.js" alt="Next.js 15" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Prisma-6.3-2D3748?logo=prisma" alt="Prisma" />
+  <img src="https://img.shields.io/badge/Auth.js-v5-purple" alt="Auth.js" />
+  <img src="https://img.shields.io/badge/PostgreSQL-production-336791?logo=postgresql" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Deployed_on-Vercel-black?logo=vercel" alt="Vercel" />
+</p>
 
-## Fitur
+<p align="center">
+  Full-stack personal finance tracker — transactions, monthly budgets, savings goals, and reports —
+  built solo end-to-end with Next.js 15 App Router, Prisma, and Auth.js.
+</p>
 
-- **Dashboard** — ringkasan pemasukan, pengeluaran, saldo, persentase tabungan, grafik bar & pie, 5 transaksi terakhir
-- **Transaksi** — CRUD lengkap (tanggal, jenis, nominal, kategori, deskripsi, metode pembayaran)
-- **Kategori** — 12 kategori default Indonesia, bisa tambah/ubah/hapus kategori sendiri
-- **Anggaran Bulanan** — budget per kategori dengan progress bar (hijau/kuning/merah)
-- **Target Tabungan** — progress lingkaran, tambah dana kapan saja
-- **Laporan** — filter hari/minggu/bulan/tahun/custom, export CSV & PDF
-- **Profil** — nama, foto, mata uang (IDR), mode terang/gelap
-- **Auth** — login Google (OAuth) dan Email/Password
-
-## Teknologi
-
-Next.js 15 (App Router) · TypeScript · Tailwind CSS · komponen ala shadcn/ui · Recharts · Prisma ORM · SQLite (dev) / PostgreSQL (production) · Auth.js (NextAuth v5) · Zod · Server Actions
+<p align="center">
+  <a href="https://dompetku-snowy.vercel.app"><strong>🔗 Live Demo</strong></a>
+  ·
+  <a href="#getting-started">Getting Started</a>
+  ·
+  <a href="#tech-stack--architecture-decisions">Architecture Notes</a>
+</p>
 
 ---
 
-## 1. Menjalankan di Lokal
+## 📸 Preview
+
+> *(Tambahkan screenshot/GIF dashboard, transaksi, dan mode gelap di sini — simpan di `public/screenshots/` lalu referensikan seperti di bawah)*
+
+```md
+![Dashboard](public/screenshots/dashboard.png)
+![Transactions](public/screenshots/transactions.png)
+![Dark Mode](public/screenshots/dark-mode.png)
+```
+
+---
+
+## ✨ Highlights
+
+Project ini dibangun sebagai showcase kemampuan full-stack development modern:
+
+- **End-to-end type safety** — dari Prisma schema → Zod validation → TypeScript types, tanpa `any` yang lolos di jalur data utama
+- **Auth production-grade** — Auth.js v5 (NextAuth) dengan OAuth (Google) + Credentials provider, password di-hash dengan bcrypt, session JWT, route protection via middleware
+- **Server Actions + Route Handlers** — dua pola mutasi data disediakan sekaligus (RSC-native Server Actions untuk UI internal, REST API Route Handlers untuk kebutuhan integrasi eksternal)
+- **Database portability** — satu Prisma schema yang jalan di SQLite (dev) maupun PostgreSQL (production) tanpa perubahan model, dengan trade-off yang didokumentasikan (lihat bagian Architecture Notes)
+- **Real data visualization** — Recharts (bar, pie, line) dikombinasikan dengan custom SVG circular progress untuk target tabungan
+- **Export functionality** — CSV generation di server, PDF generation di client (jsPDF) tanpa dependency server tambahan
+- **Fully responsive** — sidebar navigation di desktop, bottom navigation ala aplikasi mobile native di layar kecil
+- **Dark mode** — via `next-themes` dengan CSS variables, bukan sekadar toggle class
+
+---
+
+## 🧩 Fitur
+
+| Modul | Deskripsi |
+|---|---|
+| **Dashboard** | Ringkasan pemasukan/pengeluaran/saldo bulan berjalan, persentase tabungan, grafik bar & pie, 5 transaksi terakhir |
+| **Transaksi** | CRUD lengkap — tanggal, jenis, nominal, kategori, deskripsi, metode pembayaran (Cash/Bank/E-Wallet) |
+| **Kategori** | 12 kategori default Indonesia + custom kategori per user |
+| **Anggaran Bulanan** | Budget per kategori dengan progress bar dinamis (hijau <70%, kuning 70–90%, merah >90%) |
+| **Target Tabungan** | Circular progress, kontribusi dana bertahap, deadline opsional |
+| **Laporan** | Filter hari/minggu/bulan/tahun/custom range, export CSV & PDF |
+| **Profil** | Nama, foto, mata uang (IDR), mode terang/gelap |
+| **Auth** | Login Google (OAuth) & Email/Password, route protection penuh |
+
+---
+
+## 🛠️ Tech Stack & Architecture Decisions
+
+| Layer | Pilihan | Alasan |
+|---|---|---|
+| Framework | Next.js 15 (App Router) | Server Components untuk data fetching, Server Actions untuk mutasi tanpa API boilerplate |
+| Bahasa | TypeScript (strict) | Type safety end-to-end |
+| Styling | Tailwind CSS + komponen ala shadcn/ui | Desain konsisten, komponen dasar tetap dikontrol penuh (bukan black-box library) |
+| ORM | Prisma 6 | Type-safe query builder + migration tooling |
+| Database | SQLite (dev) → PostgreSQL (production) | **Trade-off yang disengaja:** skema menghindari `enum` Prisma (tidak didukung SQLite) — field seperti `type` dan `paymentMethod` disimpan sebagai `String` + divalidasi lewat Zod. Hasilnya: satu schema yang sama persis dipakai di dua database berbeda tanpa migrasi ulang model |
+| Auth | Auth.js (NextAuth) v5 | Dukungan native App Router, edge middleware, kombinasi OAuth + Credentials provider dalam satu config |
+| Validasi | Zod | Skema validasi tunggal dipakai ulang di client form, Server Actions, dan Route Handlers |
+| Charts | Recharts | Bar (income/expense), Pie (kategori pengeluaran), Line (tren saldo) |
+| Export | jsPDF + jspdf-autotable (client) / native stream (server, CSV) | Menghindari dependency server tambahan untuk generate PDF |
+| Deploy | Vercel + Prisma Postgres (Marketplace) | Zero-config CI/CD dari GitHub push, database serverless-friendly |
+
+---
+
+## 🏗️ Struktur Folder
+
+```
+dompetku/
+├─ prisma/
+│  ├─ schema.prisma        # User, Category, Transaction, Budget, SavingGoal + relasi
+│  └─ seed.ts               # Seed 12 kategori default Indonesia
+├─ src/
+│  ├─ app/
+│  │  ├─ (auth)/            # login, register
+│  │  ├─ (dashboard)/        # dashboard, transactions, categories, budget, savings, reports, settings
+│  │  └─ api/                # Route Handlers: auth, register, transactions, categories, budgets, savings, reports/export
+│  ├─ actions/                # Server Actions (mutasi via RSC)
+│  ├─ components/
+│  │  ├─ ui/                 # Komponen dasar ala shadcn/ui (button, dialog, select, dst)
+│  │  ├─ layout/              # Sidebar, bottom-nav, topbar
+│  │  └─ dashboard/, transactions/, budget/, savings/, reports/, categories/, settings/
+│  ├─ lib/                    # Prisma client, Auth.js config, utils, validasi Zod
+│  └─ types/                  # TypeScript types & NextAuth type augmentation
+└─ .env.example
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prasyarat
 - Node.js ≥ 18.18
 - npm
 
-### Langkah
+### Instalasi
 
 ```bash
-# 1. Install dependency
+git clone https://github.com/joketoyou24/dompetku.git
+cd dompetku
 npm install
-
-# 2. Salin file environment
 cp .env.example .env
 
-# 3. Generate AUTH_SECRET dan tempel ke .env
+# generate AUTH_SECRET, tempel hasilnya ke .env
 openssl rand -base64 32
 
-# 4. Buat database SQLite + tabel
 npm run db:push
-
-# 5. Isi kategori default
 npm run db:seed
-
-# 6. Jalankan development server
 npm run dev
 ```
 
 Buka [http://localhost:3000](http://localhost:3000).
 
-### Login dengan Google (opsional saat development)
-1. Buka [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials)
-2. Buat **OAuth 2.0 Client ID** tipe *Web application*
-3. Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-4. Isi `AUTH_GOOGLE_ID` dan `AUTH_GOOGLE_SECRET` di `.env`
+### Login Google (opsional)
+1. [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) → buat OAuth Client (Web application)
+2. Redirect URI: `http://localhost:3000/api/auth/callback/google`
+3. Isi `AUTH_GOOGLE_ID` & `AUTH_GOOGLE_SECRET` di `.env`
 
-Jika tidak diisi, login Google tidak akan berfungsi tapi login Email/Password tetap jalan normal.
+Tanpa ini, login Email/Password tetap berfungsi normal.
 
----
+### Environment Variables
 
-## 2. Deploy ke Vercel
+| Variable | Keterangan |
+|---|---|
+| `DATABASE_URL` | Connection string database (`file:./dev.db` dev / PostgreSQL production) |
+| `AUTH_SECRET` | Secret Auth.js — generate dengan `openssl rand -base64 32` |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Kredensial OAuth Google (opsional) |
+| `NEXT_PUBLIC_APP_URL` | URL aplikasi (untuk callback & metadata) |
 
-### Langkah singkat
-
-1. **Push kode ke GitHub** (buat repo baru, push project ini)
-
-2. **Siapkan database production (Vercel Postgres)**
-   - Di dashboard Vercel: **Storage → Create Database → Postgres**
-   - Setelah dibuat, salin `DATABASE_URL` yang diberikan (biasanya juga otomatis tersedia sebagai env var jika database di-link ke project)
-
-3. **Ubah provider Prisma untuk production**
-
-   Karena SQLite tidak didukung di lingkungan serverless Vercel, sebelum deploy ubah `prisma/schema.prisma`:
-
-   ```prisma
-   datasource db {
-     provider = "postgresql" // ubah dari "sqlite"
-     url      = env("DATABASE_URL")
-   }
-   ```
-
-   > Skema sengaja tidak memakai `enum` Prisma (field `type`, `paymentMethod` disimpan sebagai `String` + divalidasi via Zod), jadi model lain **tidak perlu diubah** apa pun saat pindah dari SQLite ke PostgreSQL.
-
-4. **Import project ke Vercel**
-   - [vercel.com/new](https://vercel.com/new) → pilih repo GitHub kamu
-   - Framework Preset: **Next.js** (otomatis terdeteksi)
-   - Build command & output biarkan default (`prisma generate && next build`, sudah diatur di `package.json`)
-
-5. **Isi Environment Variables** di Vercel (Settings → Environment Variables):
-
-   | Key | Isi |
-   |---|---|
-   | `DATABASE_URL` | connection string PostgreSQL dari Vercel Postgres |
-   | `AUTH_SECRET` | hasil `openssl rand -base64 32` |
-   | `AUTH_GOOGLE_ID` | Client ID dari Google Cloud Console |
-   | `AUTH_GOOGLE_SECRET` | Client Secret dari Google Cloud Console |
-   | `NEXT_PUBLIC_APP_URL` | `https://nama-project-kamu.vercel.app` |
-
-   Jangan lupa tambahkan redirect URI production di Google Cloud Console:
-   `https://nama-project-kamu.vercel.app/api/auth/callback/google`
-
-6. **Deploy.** Vercel akan otomatis menjalankan `npm install` → `postinstall` (`prisma generate`) → `npm run build`.
-
-7. **Migrasi skema ke database production** (sekali saja, dari lokal atau lewat Vercel CLI):
-
-   ```bash
-   # pastikan DATABASE_URL di .env lokal sudah diarahkan ke Postgres production
-   npx prisma db push
-   npx prisma db seed
-   ```
-
-   Atau jalankan lewat **Vercel CLI**:
-   ```bash
-   vercel env pull .env.production.local
-   DATABASE_URL="<connection-string>" npx prisma db push
-   DATABASE_URL="<connection-string>" npx prisma db seed
-   ```
-
-Setelah langkah di atas, aplikasi siap diakses dan berjalan tanpa konfigurasi tambahan selain environment variables.
-
----
-
-## 3. Struktur Folder
-
-```
-dompetku/
-├─ prisma/
-│  ├─ schema.prisma        # model User, Category, Transaction, Budget, SavingGoal, dll
-│  └─ seed.ts               # seed 12 kategori default Indonesia
-├─ src/
-│  ├─ app/
-│  │  ├─ (auth)/login, register
-│  │  ├─ (dashboard)/dashboard, transactions, categories, budget, savings, reports, settings
-│  │  └─ api/               # Route Handlers: auth, register, transactions, categories, budgets, savings, reports/export
-│  ├─ actions/               # Server Actions (mutasi via RSC)
-│  ├─ components/
-│  │  ├─ ui/                # komponen dasar ala shadcn/ui
-│  │  ├─ layout/             # sidebar, bottom-nav, topbar
-│  │  ├─ dashboard/, transactions/, budget/, savings/, reports/, categories/, settings/
-│  ├─ lib/                   # prisma client, auth config, utils, validasi Zod
-│  └─ types/                 # tipe TypeScript & type augmentation NextAuth
-└─ .env.example
-```
-
-## 4. Environment Variables
-
-Lihat `.env.example` untuk daftar lengkap. Variabel wajib:
-
-- `DATABASE_URL` — koneksi database (`file:./dev.db` untuk dev, connection string Postgres untuk production)
-- `AUTH_SECRET` — secret untuk Auth.js (generate dengan `openssl rand -base64 32`)
-- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` — kredensial OAuth Google (opsional jika hanya pakai login email)
-
-## 5. Catatan Teknis
-
-- **Enum di Prisma:** SQLite tidak mendukung tipe `enum`, jadi field `type` (INCOME/EXPENSE) dan `paymentMethod` (CASH/BANK/EWALLET) disimpan sebagai `String` dan divalidasi lewat Zod (`src/lib/validations.ts`) serta union type TypeScript (`src/types/index.ts`). Ini membuat satu skema Prisma bisa dipakai untuk SQLite maupun PostgreSQL tanpa perubahan model.
-- **Kategori default** bersifat global (`isDefault: true`, `userId: null`) sehingga muncul untuk semua pengguna dan tidak bisa diedit/dihapus oleh user.
-- **Export PDF** dibuat di sisi client menggunakan `jsPDF` + `jspdf-autotable` (tidak butuh endpoint server tambahan).
-- **Export CSV** dibuat di server (`/api/reports/export`) dengan BOM UTF-8 agar nominal & teks Indonesia terbaca benar di Excel.
-
-## 6. Script NPM
+### Script NPM
 
 | Script | Keterangan |
 |---|---|
-| `npm run dev` | Jalankan development server |
-| `npm run build` | Build production (`prisma generate` lalu `next build`) |
-| `npm run start` | Jalankan hasil build |
-| `npm run db:push` | Sinkronkan skema Prisma ke database tanpa migration file |
-| `npm run db:migrate` | Buat migration file (untuk workflow migrasi formal) |
+| `npm run dev` | Development server |
+| `npm run build` | Build production (`prisma generate` + `next build`) |
+| `npm run db:push` | Sinkronkan schema ke database |
 | `npm run db:seed` | Isi kategori default |
 | `npm run db:studio` | Buka Prisma Studio (GUI database) |
 
 ---
 
-Dibuat dengan 💚 — DompetKu, atur keuangan pribadimu dengan mudah.
+## 📄 License
+
+MIT — bebas dipakai, dimodifikasi, dan dikembangkan lebih lanjut.
+
+## 👤 Author
+
+**Alif**
+Built solo — dari database schema design, auth flow, hingga deployment pipeline.
+
+- Live Demo: [dompetku-snowy.vercel.app](https://dompetku-snowy.vercel.app)
+- GitHub: [@joketoyou24](https://github.com/joketoyou24)
+
+---
+
+<p align="center">Dibuat dengan 💚 — DompetKu, atur keuangan pribadimu dengan mudah.</p>
+
