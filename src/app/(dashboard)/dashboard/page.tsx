@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const start = new Date(year, month - 1, 1);
   const end = new Date(year, month, 0, 23, 59, 59);
 
-  const [transactionsThisMonth, recentTransactions] = await Promise.all([
+  const [transactionsThisMonth, recentTransactions, totalAgg] = await Promise.all([
     prisma.transaction.findMany({
       where: { userId, date: { gte: start, lte: end } },
       include: { category: true },
@@ -31,7 +31,16 @@ export default async function DashboardPage() {
       orderBy: { date: "desc" },
       take: 5,
     }),
+    prisma.transaction.groupBy({
+      by: ["type"],
+      where: { userId },
+      _sum: { amount: true },
+    }),
   ]);
+
+  const totalIncomeAllTime = totalAgg.find((a) => a.type === "INCOME")?._sum.amount ?? 0;
+  const totalExpenseAllTime = totalAgg.find((a) => a.type === "EXPENSE")?._sum.amount ?? 0;
+  const totalBalance = totalIncomeAllTime - totalExpenseAllTime;
 
   const income = transactionsThisMonth.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
   const expense = transactionsThisMonth.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
@@ -72,7 +81,15 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <SummaryCards income={income} expense={expense} balance={balance} savingsRate={savingsRate} currency={currency} />
+      <SummaryCards
+        income={income}
+        expense={expense}
+        balance={balance}
+        savingsRate={savingsRate}
+        currency={currency}
+        balanceLabel="Saldo Bulan Ini"
+        totalBalance={totalBalance}
+      />
 
       <div className="grid lg:grid-cols-2 gap-4 md:gap-6">
         <IncomeExpenseChart data={monthsData} currency={currency} />

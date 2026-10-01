@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Wallet, PiggyBank } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, PiggyBank, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function SummaryCards({
@@ -9,13 +9,19 @@ export function SummaryCards({
   balance,
   savingsRate,
   currency,
+  balanceLabel = "Saldo",
+  totalBalance,
 }: {
   income: number;
   expense: number;
   balance: number;
   savingsRate: number;
   currency: string;
+  balanceLabel?: string;
+  totalBalance?: number;
 }) {
+  const showTotalBalance = totalBalance !== undefined;
+
   const cards = [
     {
       label: "Total Pemasukan",
@@ -32,12 +38,23 @@ export function SummaryCards({
       bg: "bg-red-100 dark:bg-red-950",
     },
     {
-      label: "Saldo",
+      label: balanceLabel,
       value: formatCurrency(balance, currency),
       icon: Wallet,
       color: balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
       bg: balance >= 0 ? "bg-emerald-100 dark:bg-emerald-950" : "bg-red-100 dark:bg-red-950",
     },
+    ...(showTotalBalance
+      ? [
+          {
+            label: "Sisa Saldo Total",
+            value: formatCurrency(totalBalance!, currency),
+            icon: Landmark,
+            color: totalBalance! >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+            bg: totalBalance! >= 0 ? "bg-emerald-100 dark:bg-emerald-950" : "bg-red-100 dark:bg-red-950",
+          },
+        ]
+      : []),
     {
       label: "Persentase Tabungan",
       value: `${savingsRate}%`,
@@ -48,7 +65,7 @@ export function SummaryCards({
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+    <div className={cn("grid grid-cols-2 gap-3 md:gap-4", showTotalBalance ? "lg:grid-cols-5" : "lg:grid-cols-4")}>
       {cards.map((c) => (
         <Card key={c.label}>
           <CardContent className="p-4 md:p-5">
