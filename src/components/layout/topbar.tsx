@@ -4,6 +4,7 @@ import { signOut } from "next-auth/react";
 import { LogOut, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "./theme-toggle";
+import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,8 +32,8 @@ export function Topbar({
   return (
     <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 md:px-8 border-b border-border bg-background/80 backdrop-blur-lg">
       <div className="flex items-center gap-2 md:hidden">
-        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-white font-bold text-sm">D</span>
+        <div className="h-8 w-8 relative shrink-0">
+          <Image src="/logo-icon.png" alt="Logo DompetKu" fill className="object-contain" priority />
         </div>
         <span className="font-semibold">DompetKu</span>
       </div>

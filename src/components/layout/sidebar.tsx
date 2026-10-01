@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navItems } from "./nav-items";
@@ -13,8 +14,8 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-border bg-card">
       <div className="flex items-center gap-2 px-6 h-16 shrink-0">
-        <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center">
-          <span className="text-white font-bold">D</span>
+        <div className="h-9 w-9 relative shrink-0">
+          <Image src="/logo-icon.png" alt="Logo DompetKu" fill className="object-contain" priority />
         </div>
         <span className="font-semibold text-lg">DompetKu</span>
       </div>
